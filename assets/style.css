@@ -1,0 +1,135 @@
+body {
+    font-family: "Lato", sans-serif;
+    margin: 0;
+    background-color: #F7F7F7;
+}
+
+.header {
+    background-color: #222222;
+    height: auto;
+    padding: 16px 0 100px 0;
+    text-align: center;
+}
+
+.header-title {
+    color: #FFFFFF;
+    font-size: 48px;
+    font-weight: bold;
+    margin: 0 auto;
+}
+
+.wrapper-headers-cards {
+    margin-right: auto;
+    margin-left: auto;
+    display: flex;
+    justify-content: space-evenly;
+    height: 30px;
+    width: 1440px;
+    padding-right: 10px;
+    padding-left: 10px;
+    margin-top: 0px;
+}
+
+.wrapper-header-single {
+    height: 25px;
+    width: 650px;
+    text-align: left;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.wrapper-cards {
+    margin-right: auto;
+    margin-left: auto;
+    display: flex;
+    justify-content: space-evenly;
+    width: 1440px;
+    padding-right: 10px;
+    padding-left: 10px;
+    margin-top: 25px;
+}
+
+.table {
+    margin-top: 12px;
+    margin-bottom: 12px;
+    width: 650px;
+    box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.18)
+}
+
+.menu {
+    display: flex;
+    /*justify-content: space-evenly;*/
+    padding-top: 24px;
+    padding-bottom: 24px;
+    margin: -80px 500px 0 500px;
+    background-color: #FFFFFF;
+    box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.18);
+}
+
+.Select-control {
+    /*width: 256px;*/
+    height: 48px;
+}
+
+.Select--single > .Select-control .Select-value, .Select-placeholder {
+    line-height: 48px;
+}
+
+.Select--multi .Select-value-label {
+    line-height: 32px;
+}
+
+.menu-title {
+    font-weight: bold;
+    color: #079A82;
+    margin: 0 24px 6px 0;
+}
+
+.wrapper-button {
+    vertical-align: bottom;
+}
+
+.button {
+    width: 100px;
+    height: 100px;
+    vertical-align: bottom;
+    margin: 0 24px 0 24px;
+}
+
+.dropdown {
+    width: 256px;
+    margin: 0 24px 0 0;
+}
+
+.dropdown-long {
+    margin: 0 24px 0 0;
+}
+
+.footer {
+    background-color: #222222;
+    height: auto;
+    margin-top: 24px;
+    padding: 12px 0 12px 0;
+}
+
+.footer-description {
+    color: #CFCFCF;
+    font-size: 12px;
+    margin: 4px auto;
+    text-align: center;
+    vertical-align: top;
+    max-width: 1440px;
+}
+
+.placeholder {
+    height: 6px;
+}
+
+.link{
+    color: #CFCFCF;
+    font-size: 12px;
+    margin: 4px auto;
+    text-align: center;
+    vertical-align: top;
+    max-width: 1440px;
+}
