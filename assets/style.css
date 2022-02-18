@@ -1,7 +1,5 @@
-body {
-    font-family: "Lato", sans-serif;
-    margin: 0;
-    background-color: #F7F7F7;
+:root {
+    --margin-lr: 250px;
 }
 
 .header {
@@ -18,56 +16,16 @@ body {
     margin: 0 auto;
 }
 
-.wrapper-headers-cards {
-    margin-right: auto;
-    margin-left: auto;
-    display: flex;
-    justify-content: space-evenly;
-    height: 30px;
-    width: 1440px;
-    padding-right: 10px;
-    padding-left: 10px;
-    margin-top: 0px;
-}
-
-.wrapper-header-single {
-    height: 25px;
-    width: 650px;
-    text-align: left;
-    font-size: 18px;
-    font-weight: bold;
-}
-
-.wrapper-cards {
-    margin-right: auto;
-    margin-left: auto;
-    display: flex;
-    justify-content: space-evenly;
-    width: 1440px;
-    padding-right: 10px;
-    padding-left: 10px;
-    margin-top: 25px;
-}
-
-.table {
-    margin-top: 12px;
-    margin-bottom: 12px;
-    width: 650px;
-    box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.18)
-}
-
 .menu {
     display: flex;
-    /*justify-content: space-evenly;*/
     padding-top: 24px;
     padding-bottom: 24px;
-    margin: -80px 500px 0 500px;
+    margin: -80px var(--margin-lr) 0 var(--margin-lr);
     background-color: #FFFFFF;
     box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.18);
 }
 
 .Select-control {
-    /*width: 256px;*/
     height: 48px;
 }
 
@@ -105,31 +63,52 @@ body {
     margin: 0 24px 0 0;
 }
 
+body {
+    font-family: "Lato", sans-serif;
+    margin: 0;
+    background-color: #F7F7F7;
+}
+
+.wrapper-print{
+    display: flex;
+    justify-content: center;
+    margin: 12px var(--margin-lr) 0 var(--margin-lr);
+    padding-right: 10px;
+    padding-left: 10px;
+}
+
+.print{
+    background-color: #FFFFFF;
+    padding-right: 20px;
+    padding-left: 20px;
+    text-align: left;
+    font-size: 18px;
+    box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.18);
+}
+
+.wrapper-headers-cards {
+    margin: 12px var(--margin-lr) 0 var(--margin-lr);
+    height: 30px;
+    padding-right: 10px;
+    padding-left: 10px;
+    text-align: left;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.wrapper-cards {
+    margin: 6px var(--margin-lr) 0 var(--margin-lr);
+    padding-right: 10px;
+    padding-left: 10px;
+}
+
+.table {
+    box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.18);
+}
+
 .footer {
     background-color: #222222;
-    height: auto;
+    height: 75px;
+    width: 100%;
     margin-top: 24px;
-    padding: 12px 0 12px 0;
-}
-
-.footer-description {
-    color: #CFCFCF;
-    font-size: 12px;
-    margin: 4px auto;
-    text-align: center;
-    vertical-align: top;
-    max-width: 1440px;
-}
-
-.placeholder {
-    height: 6px;
-}
-
-.link{
-    color: #CFCFCF;
-    font-size: 12px;
-    margin: 4px auto;
-    text-align: center;
-    vertical-align: top;
-    max-width: 1440px;
 }

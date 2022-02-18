@@ -12,7 +12,7 @@ import item_generator
 import xlrd
 
 # Read xls file
-file_path = ".\\magic_items.xls"
+file_path = ".\\magic_items.xls"  # todo: somehow add this to heroku (file size to big?)
 header_rows = 1
 
 magic_item_list = []
@@ -94,11 +94,11 @@ app.layout = html.Div(
                             value=["PFRPG Core", "APG", "RotRL-AE-Appendix", "Advanced Race Guide",
                                    "Advanced Class Guide", "Adventurer's Guide", "Ultimate Equipment",
                                    "Occult Adventures", "Ultimate Intrigue"],
-                            clearable=False,
+                            clearable=True,
                             searchable=True,
                             multi=True,
                             persistence=True,
-                            persistence_type='local',
+                            persistence_type='memory',
                             className='dropdown-long'
                         ),
                     ],
@@ -112,13 +112,21 @@ app.layout = html.Div(
             children=[
                 html.Div(
                     children=[
-                        html.P(
-                            children='Table',
-                            id='header-table',
-                            className='header-card'
-                        ),
+                        html.P(id='prints1'),
+                        html.Div(className='placeholder'),
+                        html.P(id='prints2')
                     ],
-                    className='wrapper-header-single'
+                    className='print',
+                ),
+            ],
+            className='wrapper-print',
+        ),
+        html.Div(
+            children=[
+                html.P(
+                    children='Available Items',
+                    id='header-table',
+                    className='header-card'
                 ),
             ],
             className='wrapper-headers-cards'
@@ -128,11 +136,10 @@ app.layout = html.Div(
                 html.Div(
                     id='style-table',
                     children=dcc.Graph(
-                        id='table-counties',
+                        id='table-items',
                         config={'displayModeBar': False},
                     ),
                     className='table',
-                    style={'height': 500},
                 ),
             ],
             className='wrapper-cards',
@@ -140,19 +147,6 @@ app.layout = html.Div(
 
         # Footer
         html.Div(
-            children=[
-                html.P(
-                    children='abc',
-                    className='footer-description'
-                ),
-                html.Div(
-                    className='placeholder'
-                ),
-                html.P(
-                    children='def',
-                    className='footer-description'
-                ),
-            ],
             className='footer'
         )
     ]
@@ -161,8 +155,10 @@ app.layout = html.Div(
 
 @app.callback(
     [
-        Output('table-counties', 'figure'),
+        Output('table-items', 'figure'),
         Output('style-table', 'style'),
+        Output('prints1', 'children'),
+        Output('prints2', 'children'),
     ],
     [
         Input('update-button', 'n_clicks'),
@@ -175,40 +171,63 @@ app.layout = html.Div(
 def generate_items(n_clicks: int, town_size: str, allowed_sources: list):
     """
     Trigger if site is reloaded or button is pressed
-    todo: prevent trigger if site is loaded (save in "cache"?)
+    todo: prevent trigger if site is loaded (save in some sort of cache? simple csv file?)
+    todo: bug if no sources are selected
     :param n_clicks:
     :param town_size:
     :param allowed_sources:
     :return:
     """
     # Get data
-    items_df = pd.DataFrame(data=item_generator.run(magic_item_list, town_size, allowed_sources))
-    test = items_df['Price']
-    test2 = items_df['Item']
+    items_dic, print_strings = item_generator.run(magic_item_list, town_size, allowed_sources)
+    outp_str1 = []
+    outp_str2 = []
+    for idx, string in enumerate(print_strings):
+        if idx == 0:
+            outp_str1.append(string)
+        elif idx <= 2:
+            outp_str1.append(html.Br())
+            outp_str1.append(string)
+        elif idx == 3:
+            outp_str2.append(string)
+        else:
+            outp_str2.append(html.Br())
+            outp_str2.append(string)
 
-    fig_table = go.Figure(data=[go.Table(  # columnwidth=[3, 1, 1, 3, 3],
-        header=dict(values=['Item', 'Slot', 'Price', 'Source', 'Description'],
+    items_df = pd.DataFrame(data=items_dic)
+
+    fig_table = go.Figure(
+        data=[
+            go.Table(
+                columnwidth=[2, 1, 2, 2, 2, 12],
+                header=dict(
+                    values=['Item', 'Quantity', 'Slot', 'Price', 'Source', 'Description'],
                     fill_color='paleturquoise',
                     align='left',
                     height=40),
-        cells=dict(
-            values=[
-                items_df['Item'],
-                items_df['Slot'],
-                items_df['Price'],
-                items_df['Source'],
-                items_df['Description']
-            ],
-            fill_color='lavender',
-            align='left',
-            height=40,))])
-    height = 40 * (len(items_df) + 1)
+                cells=dict(
+                    values=[
+                        items_df['Name'],
+                        items_df['Quantity'],
+                        items_df['Slot'],
+                        items_df['Price'],
+                        items_df['Source'],
+                        items_df['Description']
+                    ],
+                    fill_color='lavender',
+                    align='left',
+                    height=40,
+                )
+            )
+        ]
+    )
+    height = 40 * (len(items_df) + 1) * 2  # todo: figure out, what to do for line breaks (40 is only the min height)
     fig_table.update_layout(margin=dict(l=0, r=0, t=0, b=0),
                             height=height)
-    h = {'height': height}
+    h = {'height': height}  # it is necessary to return a table height for some reason, this cant be done in css (wtf)
 
-    return fig_table, h
+    return fig_table, h, outp_str1, outp_str2
 
 
 if __name__ == '__main__':
-    app.run_server()
+    app.run_server(debug=True)

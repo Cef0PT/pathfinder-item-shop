@@ -15,10 +15,6 @@ obtainable_magic_items_per_town_size = {
     "Metropole": {"Obtainable": "16000", "faint": [0, 0], "moderate": [4, 4], "strong": [3, 4]}
 }
 
-faint_items = []
-moderate_items = []
-strong_items = []
-
 
 # functions
 def pretty_print(item: dict):
@@ -40,22 +36,23 @@ def filter_for_allowed_sources(item_list: list, sources):
     for item in item_list:
         if item["Source"] in sources:
             positive_list.append(item)
-    print(len(positive_list) + len(item_list))
     return positive_list
 
 
 def sort_by_aura_strength(item_list: list):
     sort_index = 0
+    faint, moderate, strong = [], [], []
     for item in item_list:
         if item["AuraStrength"] == "faint":
-            faint_items.append(item)
+            faint.append(item)
         elif item["AuraStrength"] == "moderate":
-            moderate_items.append(item)
+            moderate.append(item)
         elif item["AuraStrength"] == "strong":
-            strong_items.append(item)
+            strong.append(item)
         else:
             sort_index += 1
-    print(f"There were {sort_index} items without feasible aura strength.")
+    print_str = f"There were {sort_index} items without feasible aura strength."
+    return faint, moderate, strong, print_str
 
 
 def roll_n_die_m(n: int, m: int, aura_strength=""):
@@ -69,80 +66,92 @@ def roll_n_die_m(n: int, m: int, aura_strength=""):
     die_sum = sum(sides)
     line = str(die_sum) + " " + line
     if aura_strength == "":
-        print(f"Rolling {n}d{m}: " + line)
+        print_str = f"Rolling {n}d{m}: " + line
     else:
-        print(f"Rolling for {n}d{m} {aura_strength} items: " + line)
-    return die_sum
+        print_str = f"Rolling for {n}d{m} {aura_strength} items: " + line
+    return die_sum, print_str
 
 
-def get_item_by_aura_strength(aura_strength: str):
-    if aura_strength == "faint":
-        item_list = faint_items
-    elif aura_strength == "moderate":
-        item_list = moderate_items
-    elif aura_strength == "strong":
-        item_list = strong_items
+def get_item_by_aura_strength(aura_list: list):
+    if len(aura_list) > 0:
+        item = aura_list[random.randint(0, len(aura_list)-1)]
+        while item["Price"] == "":
+            item = aura_list[random.randint(0, len(aura_list)-1)]
+        return item
+
     else:
-        print("Please provide a valid aura strength.")
-        return
-    item = item_list[random.randint(1, len(item_list))]
-    if item["Price"] == "":
-        return get_item_by_aura_strength(aura_strength)
-    return item
+        print_str = "Please provide a valid aura list."
+        return print_str
 
 
 # main
 def run(magic_item_list: list, execute_for_town_size: str, list_of_allowed_sources: list):
-    print("Number of all magic items: " + str(len(magic_item_list)))
+    print_strings = ["Number of all magic items: " + str(len(magic_item_list))]
     cleaned_magic_item_list = filter_for_allowed_sources(magic_item_list, list_of_allowed_sources)
-    print("Number of magic items that are allowed: " + str(len(cleaned_magic_item_list)))
-    sort_by_aura_strength(cleaned_magic_item_list)
-    print()
+    print_strings.append("Number of magic items that are allowed: " + str(len(cleaned_magic_item_list)))
+    faint_items, moderate_items, strong_items, print_str = sort_by_aura_strength(cleaned_magic_item_list)
+    print_strings.append(print_str)
 
-    item_dic = {'Item': [], 'Slot': [], 'Price': [], 'Source': [], 'Description': []}
+    rolled_items = []
+
+    def append_item(it):
+        it['Quantity'] = 1  # Init Quantity column
+        is_duplicate = False
+        for item in rolled_items:
+            if item['Name'] == it['Name']:  # Check for duplicates
+                item['Quantity'] += 1
+                is_duplicate = True
+                break
+
+        if not is_duplicate:
+            rolled_items.append(it)
+
     # get faint items
     if execute_for_town_size != "Metropole":
         n, m = obtainable_magic_items_per_town_size[execute_for_town_size]["faint"]
-        number_of_faint_items = roll_n_die_m(n, m, "faint")
+        number_of_faint_items, print_str = roll_n_die_m(n, m, "faint")
+        print_strings.append(print_str)
         for index in range(number_of_faint_items):
-            this_item = get_item_by_aura_strength("faint")
-            item_dic['Item'].append(this_item['Name'])
-            item_dic['Slot'].append(this_item['Slot'])
-            item_dic['Price'].append(this_item['Price'])
-            item_dic['Source'].append(this_item['Source'])
-            item_dic['Description'].append(this_item['Description'])
+            this_item = get_item_by_aura_strength(faint_items)
+            if isinstance(this_item, str):
+                print_strings.append(this_item)
+            else:
+                append_item(this_item)
     else:
-        print("All faint magic items are available.")
+        print_strings.append("All faint magic items are available.")
 
     # get moderate items
     if execute_for_town_size not in ["Weiler", "Nest"]:
         n, m = obtainable_magic_items_per_town_size[execute_for_town_size]["moderate"]
-        number_of_moderate_items = roll_n_die_m(n, m, "moderate")
+        number_of_moderate_items, print_str = roll_n_die_m(n, m, "moderate")
+        print_strings.append(print_str)
         for index in range(number_of_moderate_items):
-            this_item = get_item_by_aura_strength("moderate")
-            item_dic['Item'].append(this_item['Name'])
-            item_dic['Slot'].append(this_item['Slot'])
-            item_dic['Price'].append(this_item['Price'])
-            item_dic['Source'].append(this_item['Source'])
-            item_dic['Description'].append(this_item['Description'])
+            this_item = get_item_by_aura_strength(moderate_items)
+            if isinstance(this_item, str):
+                print_strings.append(this_item)
+            else:
+                append_item(this_item)
     else:
-        print("No moderate magic items are available.")
+        print_strings.append("No moderate magic items are available.")
 
     # get strong items
     if execute_for_town_size not in ["Weiler", "Nest", "Ansiedlung", "Kleines Dorf"]:
         n, m = obtainable_magic_items_per_town_size[execute_for_town_size]["strong"]
-        number_of_strong_items = roll_n_die_m(n, m, "strong")
+        number_of_strong_items, print_str = roll_n_die_m(n, m, "strong")
+        print_strings.append(print_str)
         for index in range(number_of_strong_items):
-            this_item = get_item_by_aura_strength("strong")
-            item_dic['Item'].append(this_item['Name'])
-            item_dic['Slot'].append(this_item['Slot'])
-            item_dic['Price'].append(this_item['Price'])
-            item_dic['Source'].append(this_item['Source'])
-            item_dic['Description'].append(this_item['Description'])
+            this_item = get_item_by_aura_strength(strong_items)
+            if isinstance(this_item, str):
+                print_strings.append(this_item)
+            else:
+                append_item(this_item)
     else:
-        print("No strong magic items are available.")
+        print_strings.append("No strong magic items are available.")
     # roll_n_die_m(4, 5, "faint")
     obtainable = obtainable_magic_items_per_town_size[execute_for_town_size]["Obtainable"]
-    print(f"Any magic items that cost at most {obtainable} are by a 75% chance available.")
+    print_strings.append(f"Any magic items that cost at most {obtainable} are by a 75% chance available.")
 
-    return item_dic
+    # List of dicts to dict of lists
+    rolled_items_dic = {k: [dic[k] for dic in rolled_items] for k in rolled_items[0]}
+
+    return rolled_items_dic, print_strings
