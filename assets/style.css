@@ -2,6 +2,12 @@
     --margin-lr: 250px;
 }
 
+body {
+    font-family: "Lato", sans-serif;
+    margin: 0;
+    background-color: #F7F7F7;
+}
+
 .header {
     background-color: #222222;
     height: auto;
@@ -61,12 +67,6 @@
 
 .dropdown-long {
     margin: 0 24px 0 0;
-}
-
-body {
-    font-family: "Lato", sans-serif;
-    margin: 0;
-    background-color: #F7F7F7;
 }
 
 .wrapper-print{

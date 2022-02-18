@@ -12,7 +12,7 @@ import item_generator
 import xlrd
 
 # Read xls file
-file_path = ".\\magic_items.xls"  # todo: somehow add this to heroku (file size to big?)
+file_path = "./magic_items.xls"  # todo: somehow add this to heroku (file size to big?)
 header_rows = 1
 
 magic_item_list = []
@@ -155,10 +155,10 @@ app.layout = html.Div(
 
 @app.callback(
     [
-        Output('table-items', 'figure'),
-        Output('style-table', 'style'),
         Output('prints1', 'children'),
         Output('prints2', 'children'),
+        Output('table-items', 'figure'),
+        Output('style-table', 'style'),
     ],
     [
         Input('update-button', 'n_clicks'),
@@ -226,7 +226,7 @@ def generate_items(n_clicks: int, town_size: str, allowed_sources: list):
                             height=height)
     h = {'height': height}  # it is necessary to return a table height for some reason, this cant be done in css (wtf)
 
-    return fig_table, h, outp_str1, outp_str2
+    return outp_str1, outp_str2, fig_table, h
 
 
 if __name__ == '__main__':
