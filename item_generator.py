@@ -15,6 +15,8 @@ obtainable_magic_items_per_town_size = {
     "Metropole": {"Obtainable": "16000", "faint": [0, 0], "moderate": [4, 4], "strong": [3, 4]}
 }
 
+factor = 100  # factor the price of an individual item may be greater than the items that are generically available
+max_price= int(obtainable_magic_items_per_town_size[execute_for_town_size]["Obtainable"])*factor
 
 # functions
 def pretty_print(item: dict):
@@ -112,7 +114,10 @@ def run(magic_item_list: list, execute_for_town_size: str, list_of_allowed_sourc
         number_of_faint_items, print_str = roll_n_die_m(n, m, "faint")
         print_strings.append(print_str)
         for index in range(number_of_faint_items):
-            this_item = get_item_by_aura_strength(faint_items)
+            current_price = None
+            while current_price is None or current_price>max_price:
+                this_item = get_item_by_aura_strength(faint_items)
+                current_price=int(current_item["Price"][:len(current_item["Price"])-3].replace(",",""))
             if isinstance(this_item, str):
                 print_strings.append(this_item)
             else:
@@ -126,7 +131,10 @@ def run(magic_item_list: list, execute_for_town_size: str, list_of_allowed_sourc
         number_of_moderate_items, print_str = roll_n_die_m(n, m, "moderate")
         print_strings.append(print_str)
         for index in range(number_of_moderate_items):
-            this_item = get_item_by_aura_strength(moderate_items)
+            current_price = None
+            while current_price is None or current_price>max_price:
+                this_item = get_item_by_aura_strength(moderate_items)
+                current_price=int(current_item["Price"][:len(current_item["Price"])-3].replace(",",""))
             if isinstance(this_item, str):
                 print_strings.append(this_item)
             else:
@@ -140,7 +148,10 @@ def run(magic_item_list: list, execute_for_town_size: str, list_of_allowed_sourc
         number_of_strong_items, print_str = roll_n_die_m(n, m, "strong")
         print_strings.append(print_str)
         for index in range(number_of_strong_items):
-            this_item = get_item_by_aura_strength(strong_items)
+            current_price = None
+            while current_price is None or current_price>max_price:
+                this_item = get_item_by_aura_strength(strong_items)
+                current_price=int(current_item["Price"][:len(current_item["Price"])-3].replace(",",""))
             if isinstance(this_item, str):
                 print_strings.append(this_item)
             else:
