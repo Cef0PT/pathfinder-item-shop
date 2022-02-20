@@ -7,12 +7,11 @@ from dash import html
 from dash import dcc
 from dash.dependencies import Output, Input, State
 import plotly.graph_objects as go
-import pandas as pd
 import item_generator
 import xlrd
 
 # Read xls file
-file_path = "./magic_items.xls"  # todo: somehow add this to heroku (file size to big?)
+file_path = "./magic_items.xls"
 header_rows = 1
 
 magic_item_list = []
@@ -178,8 +177,10 @@ def generate_items(n_clicks: int, town_size: str, allowed_sources: list):
     :param allowed_sources:
     :return:
     """
-    # Get data
+    # Run item generator
     items_dic, print_strings = item_generator.run(magic_item_list, town_size, allowed_sources)
+
+    # Create output strings
     outp_str1 = []
     outp_str2 = []
     for idx, string in enumerate(print_strings):
@@ -194,8 +195,7 @@ def generate_items(n_clicks: int, town_size: str, allowed_sources: list):
             outp_str2.append(html.Br())
             outp_str2.append(string)
 
-    items_df = pd.DataFrame(data=items_dic)
-
+    # Create table
     fig_table = go.Figure(
         data=[
             go.Table(
@@ -207,12 +207,12 @@ def generate_items(n_clicks: int, town_size: str, allowed_sources: list):
                     height=40),
                 cells=dict(
                     values=[
-                        items_df['Name'],
-                        items_df['Quantity'],
-                        items_df['Slot'],
-                        items_df['Price'],
-                        items_df['Source'],
-                        items_df['Description']
+                        items_dic['Name'],
+                        items_dic['Quantity'],
+                        items_dic['Slot'],
+                        items_dic['Price'],
+                        items_dic['Source'],
+                        items_dic['Description']
                     ],
                     fill_color='lavender',
                     align='left',
@@ -221,8 +221,8 @@ def generate_items(n_clicks: int, town_size: str, allowed_sources: list):
             )
         ]
     )
-    height = 40 * (len(items_df) + 1) * 2  # todo: figure out, what to do for line breaks (40 is only the min height)
-    fig_table.update_layout(margin=dict(l=0, r=0, t=0, b=0),
+    height = 40 * (len(items_dic['Name']) + 1) * 2  # todo: figure out, what to do for line breaks (40 is min height)
+    fig_table.update_layout(margin=dict(l=0, r=20, t=0, b=0),
                             height=height)
     h = {'height': height}  # it is necessary to return a table height for some reason, this cant be done in css (wtf)
 
