@@ -97,7 +97,7 @@ def get_item_by_aura_strength(aura_list: list, aura_strength: str):
 # main
 def run(magic_item_list: list, execute_for_town_size: str, list_of_allowed_sources: list):
     if not list_of_allowed_sources:
-        print_strings = ['ERROR: Please provide a source.']
+        print_strings = ['ERROR: Please provide a rule set.']
         return None, print_strings
 
     max_price = int(obtainable_magic_items_per_town_size[execute_for_town_size]["Obtainable"]) * price_factor
