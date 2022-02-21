@@ -97,7 +97,7 @@ app.layout = html.Div(
                             searchable=True,
                             multi=True,
                             persistence=True,
-                            persistence_type='memory',
+                            persistence_type='local',
                             className='dropdown-long'
                         ),
                     ],
