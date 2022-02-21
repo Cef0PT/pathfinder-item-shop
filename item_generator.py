@@ -82,7 +82,7 @@ def roll_n_die_m(n: int, m: int, aura_strength=""):
     return die_sum, print_str
 
 
-def get_item_by_aura_strength(aura_list: list):
+def get_item_by_aura_strength(aura_list: list, aura_strength: str):
     if len(aura_list) > 0:
         item = aura_list[random.randint(0, len(aura_list)-1)]
         while item["Price"] == "":
@@ -90,12 +90,16 @@ def get_item_by_aura_strength(aura_list: list):
         return item
 
     else:
-        print_str = "Error in application: Please provide a valid aura list for "
+        print_str = f"ERROR : No {aura_strength} items available in selected sources!"
         return print_str
 
 
 # main
 def run(magic_item_list: list, execute_for_town_size: str, list_of_allowed_sources: list):
+    if not list_of_allowed_sources:
+        print_strings = ['ERROR: Please provide a source.']
+        return None, print_strings
+
     max_price = int(obtainable_magic_items_per_town_size[execute_for_town_size]["Obtainable"]) * price_factor
     print_strings = ["Number of all magic items: " + str(len(magic_item_list))]
     cleaned_magic_item_list = filter_allowed_items(magic_item_list, list_of_allowed_sources, max_price)
@@ -115,7 +119,9 @@ def run(magic_item_list: list, execute_for_town_size: str, list_of_allowed_sourc
                 break
 
         if not is_duplicate:
-            rolled_items.append(it)
+            # You cannot pass anything by value in Python, so 'it['Quantity'] = 1' would reset the Quantity in
+            # rolled_items to 1. Therefore, we append a copy of it, instead of it itself
+            rolled_items.append(dict(it))
 
     # get faint items
     if execute_for_town_size != "Metropole":
@@ -123,9 +129,10 @@ def run(magic_item_list: list, execute_for_town_size: str, list_of_allowed_sourc
         number_of_faint_items, print_str = roll_n_die_m(n, m, "faint")
         print_strings.append(print_str)
         for index in range(number_of_faint_items):
-            current_item = get_item_by_aura_strength(faint_items)
+            current_item = get_item_by_aura_strength(faint_items, "faint")
             if isinstance(current_item, str):
-                print_strings.append(current_item + 'faint items.')
+                print_strings.append(current_item)
+                break
             else:
                 append_item(current_item)
     else:
@@ -137,9 +144,10 @@ def run(magic_item_list: list, execute_for_town_size: str, list_of_allowed_sourc
         number_of_moderate_items, print_str = roll_n_die_m(n, m, "moderate")
         print_strings.append(print_str)
         for index in range(number_of_moderate_items):
-            current_item = get_item_by_aura_strength(moderate_items)
+            current_item = get_item_by_aura_strength(moderate_items, "moderate")
             if isinstance(current_item, str):
-                print_strings.append(current_item + 'moderate items.')
+                print_strings.append(current_item)
+                break
             else:
                 append_item(current_item)
     else:
@@ -151,9 +159,10 @@ def run(magic_item_list: list, execute_for_town_size: str, list_of_allowed_sourc
         number_of_strong_items, print_str = roll_n_die_m(n, m, "strong")
         print_strings.append(print_str)
         for index in range(number_of_strong_items):
-            current_item = get_item_by_aura_strength(strong_items)
+            current_item = get_item_by_aura_strength(strong_items, "strong")
             if isinstance(current_item, str):
-                print_strings.append(current_item + 'strong items.')
+                print_strings.append(current_item)
+                break
             else:
                 append_item(current_item)
     else:
@@ -163,6 +172,9 @@ def run(magic_item_list: list, execute_for_town_size: str, list_of_allowed_sourc
     print_strings.append(f"Any magic items that cost at most {obtainable} are by a 75% chance available.")
 
     # List of dicts to dict of lists
-    rolled_items_dic = {k: [dic[k] for dic in rolled_items] for k in rolled_items[0]}
+    if rolled_items:
+        rolled_items_dic = {k: [dic[k] for dic in rolled_items] for k in rolled_items[0]}
+    else:
+        rolled_items_dic = None
 
     return rolled_items_dic, print_strings

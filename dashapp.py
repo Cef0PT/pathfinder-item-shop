@@ -111,14 +111,14 @@ app.layout = html.Div(
             children=[
                 html.Div(
                     children=[
-                        html.P(id='prints1'),
-                        html.Div(className='placeholder'),
-                        html.P(id='prints2')
+                        html.Div(id='prints1', className='print-line'),
+                        html.Div(id='placeholder'),
+                        html.Div(id='prints2', className='print-line')
                     ],
-                    className='print',
+                    className='wrapper-txt',
                 ),
             ],
-            className='wrapper-print',
+            className='wrapper-output',
         ),
         html.Div(
             children=[
@@ -155,6 +155,7 @@ app.layout = html.Div(
 @app.callback(
     [
         Output('prints1', 'children'),
+        Output('placeholder', 'style'),
         Output('prints2', 'children'),
         Output('table-items', 'figure'),
         Output('style-table', 'style'),
@@ -170,8 +171,6 @@ app.layout = html.Div(
 def generate_items(n_clicks: int, town_size: str, allowed_sources: list):
     """
     Trigger if site is reloaded or button is pressed
-    todo: bug if no sources are selected
-    todo: table sometimes shows less items, than it should
     :param n_clicks:
     :param town_size:
     :param allowed_sources:
@@ -182,32 +181,38 @@ def generate_items(n_clicks: int, town_size: str, allowed_sources: list):
         items_dic, print_strings = item_generator.run(magic_item_list, town_size, allowed_sources)
 
         # Save table and output string in csv/txt files
-        items_df = pd.DataFrame(data=items_dic)
-        items_df.to_csv('current_table.csv')
-        with open('output_strings.txt', 'w') as f:
-            for string in print_strings:
-                f.write(string + '\n')
+        if items_dic is not None:
+            items_df = pd.DataFrame(data=items_dic)
+            items_df.to_csv('current_table.csv')
+            with open('output_strings.txt', 'w') as f:
+                for string in print_strings:
+                    f.write(string + '\n')
+        else:
+            items_df = pd.DataFrame(columns=['Name', 'Quantity', 'Slot', 'Price', 'Source', 'Description'])
     else:
         # Read csv/txt files on page load
-        print_strings = ['a']
         items_df = pd.read_csv('current_table.csv')
         with open('output_strings.txt', 'r') as f:
             print_strings = f.readlines()
 
+    # Placeholder is only needed if there are more than 3 lines
+    if len(print_strings) > 3:
+        placeholder_style = {'height': '18px'}
+    else:
+        placeholder_style = {'height': '0px'}
     # Create output strings
     outp_str1 = []
     outp_str2 = []
     for idx, string in enumerate(print_strings):
-        if idx == 0:
-            outp_str1.append(string)
-        elif idx <= 2:
-            outp_str1.append(html.Br())
-            outp_str1.append(string)
-        elif idx == 3:
-            outp_str2.append(string)
+        if 'ERROR' in string:
+            str_style = {'color': 'red'}
         else:
-            outp_str2.append(html.Br())
-            outp_str2.append(string)
+            str_style = {'color': 'black'}
+
+        if idx <= 2:
+            outp_str1.append(html.P(children=string, style=str_style, className='print-p'))
+        else:
+            outp_str2.append(html.P(children=string, style=str_style, className='print-p'))
 
     # Create table
     fig_table = go.Figure(
@@ -236,11 +241,11 @@ def generate_items(n_clicks: int, town_size: str, allowed_sources: list):
         ]
     )
     height = 40 * (len(items_df['Name']) + 1) * 2  # todo: figure out, what to do for line breaks (40 is min height)
-    fig_table.update_layout(margin=dict(l=1, r=20, t=1, b=1),
+    fig_table.update_layout(margin=dict(l=3, r=18, t=0, b=0),
                             height=height)
     h = {'height': height}  # it is necessary to return a table height for some reason, this cant be done in css (wtf)
 
-    return outp_str1, outp_str2, fig_table, h
+    return outp_str1, placeholder_style, outp_str2, fig_table, h
 
 
 if __name__ == '__main__':
