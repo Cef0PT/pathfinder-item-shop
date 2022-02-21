@@ -1,0 +1,7 @@
+Number of all magic items: 4241
+Number of magic items that are allowed: 1708
+There were 67 items without feasible aura strength.
+Rolling for 4d4 faint items: 14 (4 + 3 + 4 + 3)
+Rolling for 3d4 moderate items: 6 (1 + 1 + 4)
+Rolling for 2d6 strong items: 7 (3 + 4)
+Any magic items that cost at most 8000 are by a 75% chance available.

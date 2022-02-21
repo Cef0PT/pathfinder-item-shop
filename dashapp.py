@@ -6,6 +6,7 @@ import dash
 from dash import html
 from dash import dcc
 from dash.dependencies import Output, Input, State
+import pandas as pd
 import plotly.graph_objects as go
 import item_generator
 import xlrd
@@ -61,7 +62,6 @@ app.layout = html.Div(
                         html.Button(
                             children='Generate Items',
                             id='update-button',
-                            n_clicks=0,
                             className='button',
                         ),
                     ],
@@ -170,15 +170,29 @@ app.layout = html.Div(
 def generate_items(n_clicks: int, town_size: str, allowed_sources: list):
     """
     Trigger if site is reloaded or button is pressed
-    todo: prevent trigger if site is loaded (save in some sort of cache? simple csv file?)
     todo: bug if no sources are selected
+    todo: table sometimes shows less items, than it should
     :param n_clicks:
     :param town_size:
     :param allowed_sources:
     :return:
     """
-    # Run item generator
-    items_dic, print_strings = item_generator.run(magic_item_list, town_size, allowed_sources)
+    if n_clicks is not None:
+        # Run item generator
+        items_dic, print_strings = item_generator.run(magic_item_list, town_size, allowed_sources)
+
+        # Save table and output string in csv/txt files
+        items_df = pd.DataFrame(data=items_dic)
+        items_df.to_csv('current_table.csv')
+        with open('output_strings.txt', 'w') as f:
+            for string in print_strings:
+                f.write(string + '\n')
+    else:
+        # Read csv/txt files on page load
+        print_strings = ['a']
+        items_df = pd.read_csv('current_table.csv')
+        with open('output_strings.txt', 'r') as f:
+            print_strings = f.readlines()
 
     # Create output strings
     outp_str1 = []
@@ -207,12 +221,12 @@ def generate_items(n_clicks: int, town_size: str, allowed_sources: list):
                     height=40),
                 cells=dict(
                     values=[
-                        items_dic['Name'],
-                        items_dic['Quantity'],
-                        items_dic['Slot'],
-                        items_dic['Price'],
-                        items_dic['Source'],
-                        items_dic['Description']
+                        items_df['Name'],
+                        items_df['Quantity'],
+                        items_df['Slot'],
+                        items_df['Price'],
+                        items_df['Source'],
+                        items_df['Description']
                     ],
                     fill_color='lavender',
                     align='left',
@@ -221,8 +235,8 @@ def generate_items(n_clicks: int, town_size: str, allowed_sources: list):
             )
         ]
     )
-    height = 40 * (len(items_dic['Name']) + 1) * 2  # todo: figure out, what to do for line breaks (40 is min height)
-    fig_table.update_layout(margin=dict(l=0, r=20, t=0, b=0),
+    height = 40 * (len(items_df['Name']) + 1) * 2  # todo: figure out, what to do for line breaks (40 is min height)
+    fig_table.update_layout(margin=dict(l=1, r=20, t=1, b=1),
                             height=height)
     h = {'height': height}  # it is necessary to return a table height for some reason, this cant be done in css (wtf)
 
@@ -230,4 +244,4 @@ def generate_items(n_clicks: int, town_size: str, allowed_sources: list):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server()

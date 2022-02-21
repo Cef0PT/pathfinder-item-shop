@@ -15,7 +15,8 @@ obtainable_magic_items_per_town_size = {
     "Metropole": {"Obtainable": "16000", "faint": [0, 0], "moderate": [4, 4], "strong": [3, 4]}
 }
 
-factor = 100  # factor the price of an individual item may be greater than the items that are generically available
+# factor the price of an individual item may be greater than the items that are generically available
+price_factor = 100
 
 
 # functions
@@ -33,11 +34,18 @@ def get_sources(item_list: list):
     return sources_list
 
 
-def filter_for_allowed_sources(item_list: list, sources):
+def filter_allowed_items(item_list: list, sources: list, max_price: int):
     positive_list = []
     for item in item_list:
-        if item["Source"] in sources:
-            positive_list.append(item)
+        if item["Source"] in sources and not item['Price'] == '':
+            # Fix items with float as price
+            if isinstance(item['Price'], float):
+                item['Price'] = str(int(item['Price'])) + ' gp'
+
+            # Filter for max price
+            numeric_filter = filter(str.isdigit, item['Price'])
+            if int(''.join(numeric_filter)) <= max_price:
+                positive_list.append(item)
     return positive_list
 
 
@@ -88,10 +96,9 @@ def get_item_by_aura_strength(aura_list: list):
 
 # main
 def run(magic_item_list: list, execute_for_town_size: str, list_of_allowed_sources: list):
-    max_price = int(obtainable_magic_items_per_town_size[execute_for_town_size]["Obtainable"]) * factor
-
+    max_price = int(obtainable_magic_items_per_town_size[execute_for_town_size]["Obtainable"]) * price_factor
     print_strings = ["Number of all magic items: " + str(len(magic_item_list))]
-    cleaned_magic_item_list = filter_for_allowed_sources(magic_item_list, list_of_allowed_sources)
+    cleaned_magic_item_list = filter_allowed_items(magic_item_list, list_of_allowed_sources, max_price)
     print_strings.append("Number of magic items that are allowed: " + str(len(cleaned_magic_item_list)))
     faint_items, moderate_items, strong_items, print_str = sort_by_aura_strength(cleaned_magic_item_list)
     print_strings.append(print_str)
@@ -116,15 +123,11 @@ def run(magic_item_list: list, execute_for_town_size: str, list_of_allowed_sourc
         number_of_faint_items, print_str = roll_n_die_m(n, m, "faint")
         print_strings.append(print_str)
         for index in range(number_of_faint_items):
-            current_price = None
-            while current_price is None or current_price > max_price:
-                this_item = get_item_by_aura_strength(faint_items)
-                # @Joey: Du musst hier nicht die Länge abfragen, -3 reicht :>
-                current_price = int(this_item["Price"][:-3].replace(",", ""))
-            if isinstance(this_item, str):
-                print_strings.append(this_item + 'faint items.')
+            current_item = get_item_by_aura_strength(faint_items)
+            if isinstance(current_item, str):
+                print_strings.append(current_item + 'faint items.')
             else:
-                append_item(this_item)
+                append_item(current_item)
     else:
         print_strings.append("All faint magic items are available.")
 
@@ -134,14 +137,11 @@ def run(magic_item_list: list, execute_for_town_size: str, list_of_allowed_sourc
         number_of_moderate_items, print_str = roll_n_die_m(n, m, "moderate")
         print_strings.append(print_str)
         for index in range(number_of_moderate_items):
-            current_price = None
-            while current_price is None or current_price > max_price:
-                this_item = get_item_by_aura_strength(moderate_items)
-                current_price = int(this_item["Price"][:-3].replace(",", ""))
-            if isinstance(this_item, str):
-                print_strings.append(this_item + 'moderate items.')
+            current_item = get_item_by_aura_strength(moderate_items)
+            if isinstance(current_item, str):
+                print_strings.append(current_item + 'moderate items.')
             else:
-                append_item(this_item)
+                append_item(current_item)
     else:
         print_strings.append("No moderate magic items are available.")
 
@@ -151,14 +151,11 @@ def run(magic_item_list: list, execute_for_town_size: str, list_of_allowed_sourc
         number_of_strong_items, print_str = roll_n_die_m(n, m, "strong")
         print_strings.append(print_str)
         for index in range(number_of_strong_items):
-            current_price = None
-            while current_price is None or current_price > max_price:
-                this_item = get_item_by_aura_strength(strong_items)
-                current_price = int(this_item["Price"][:-3].replace(",", ""))
-            if isinstance(this_item, str):
-                print_strings.append(this_item + 'strong items.')
+            current_item = get_item_by_aura_strength(strong_items)
+            if isinstance(current_item, str):
+                print_strings.append(current_item + 'strong items.')
             else:
-                append_item(this_item)
+                append_item(current_item)
     else:
         print_strings.append("No strong magic items are available.")
     # roll_n_die_m(4, 5, "faint")

@@ -3,3 +3,4 @@ dnspython~=2.2.0
 dash==2.2.0
 plotly~=5.6.0
 xlrd~=2.0.1
+pandas~=1.4.1
