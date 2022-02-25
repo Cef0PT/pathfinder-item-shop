@@ -47,8 +47,9 @@ app.layout = html.Div(
         # Header
         html.Div(
             children=[
+                html.Img(src='assets/pathfinder_logo.png', className='header-picture'),
                 html.H1(
-                    children='Pathfinder Item Shop', className='header-title'
+                    children='Item Shop', className='header-title'
                 ),
             ],
             className='header',
@@ -98,7 +99,8 @@ app.layout = html.Div(
                             multi=True,
                             persistence=True,
                             persistence_type='local',
-                            className='dropdown-long'
+                            style={'padding-bottom': 5},
+                            className='dropdown-long',
                         ),
                     ],
                 ),
@@ -214,6 +216,15 @@ def generate_items(n_clicks: int, town_size: str, allowed_sources: list):
         else:
             outp_str2.append(html.P(children=string, style=str_style, className='print-p'))
 
+    # Sort table
+    price_int = []
+    for price in items_df['Price']:
+        numeric_filter = filter(str.isdigit, price)
+        price_int.append(int(''.join(numeric_filter)))
+    price_int = pd.DataFrame(data={'Price INT': price_int})
+    items_df = items_df.join(price_int)
+    items_df.sort_values(['Price INT', 'Name'], inplace=True)
+
     # Create table
     fig_table = go.Figure(
         data=[
@@ -221,7 +232,8 @@ def generate_items(n_clicks: int, town_size: str, allowed_sources: list):
                 columnwidth=[2, 1, 2, 2, 2, 12],
                 header=dict(
                     values=['Item', 'Quantity', 'Slot', 'Price', 'Source', 'Description'],
-                    fill_color='paleturquoise',
+                    fill_color='#222222',
+                    font=dict(color='#FFFFFF'),
                     align='left',
                     height=40),
                 cells=dict(
@@ -233,14 +245,15 @@ def generate_items(n_clicks: int, town_size: str, allowed_sources: list):
                         items_df['Source'],
                         items_df['Description']
                     ],
-                    fill_color='lavender',
+                    fill_color='#dde4eb',
                     align='left',
                     height=40,
                 )
             )
         ]
     )
-    height = 40 * (len(items_df['Name']) + 1) * 2  # todo: figure out, what to do for line breaks (40 is min height)
+    height = 80 * (len(items_df['Name']) + 1)
+    height = 800
     fig_table.update_layout(margin=dict(l=3, r=18, t=0, b=0),
                             height=height)
     h = {'height': height}  # it is necessary to return a table height for some reason, this cant be done in css (wtf)
