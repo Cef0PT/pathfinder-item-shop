@@ -202,6 +202,7 @@ def generate_items(n_clicks: int, town_size: str, allowed_sources: list):
         placeholder_style = {'height': '18px'}
     else:
         placeholder_style = {'height': '0px'}
+
     # Create output strings
     outp_str1 = []
     outp_str2 = []
@@ -209,7 +210,7 @@ def generate_items(n_clicks: int, town_size: str, allowed_sources: list):
         if 'ERROR' in string:
             str_style = {'color': 'red'}
         else:
-            str_style = {'color': 'black'}
+            str_style = {'color': '#222222'}
 
         if idx <= 2:
             outp_str1.append(html.P(children=string, style=str_style, className='print-p'))
@@ -252,9 +253,9 @@ def generate_items(n_clicks: int, town_size: str, allowed_sources: list):
             )
         ]
     )
-    height = 80 * (len(items_df['Name']) + 1)
-    height = 800
-    fig_table.update_layout(margin=dict(l=3, r=18, t=0, b=0),
+    # height = 40 * (len(items_df['Name']) + 1)
+    height = 800  # fix height for now (can't figure out what to do for line breaks in description)
+    fig_table.update_layout(margin=dict(l=3, r=18, t=0, b=1),
                             height=height)
     h = {'height': height}  # it is necessary to return a table height for some reason, this cant be done in css (wtf)
 
