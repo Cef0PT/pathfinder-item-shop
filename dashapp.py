@@ -12,7 +12,7 @@ import item_generator
 import xlrd
 
 # Read xls file
-file_path = "./magic_items.xls"
+file_path = "./assets/magic_items.xls"
 header_rows = 1
 
 magic_item_list = []
@@ -60,15 +60,33 @@ app.layout = html.Div(
             children=[
                 html.Div(
                     children=[
-                        html.Button(
-                            children='Generate Items',
-                            id='update-button',
-                            className='button',
+                        html.Div(
+                            children=[
+                                html.Button(
+                                    children='Generate Items',
+                                    id='update-button',
+                                    className='button',
+                                ),
+                            ],
+                            className='wrapper-button',
+                        ),
+                        html.Div(
+                            style={'height': 10},
+                        ),
+                        html.Div(
+                            children=[
+                                html.Button(
+                                    children='Download as HTML',
+                                    id='download-button',
+                                    className='button',
+                                ),
+                                dcc.Download(id='download-dcc')
+                            ],
+                            className='wrapper-button',
                         ),
                     ],
-                    className='wrapper-button',
+                    className='wrapper-wrapper-button',
                 ),
-
                 html.Div(
                     children=[
                         html.Div(children='Stadtgröße', className='menu-title'),
@@ -172,11 +190,12 @@ app.layout = html.Div(
 )
 def generate_items(n_clicks: int, town_size: str, allowed_sources: list):
     """
-    Trigger if site is reloaded or button is pressed
-    :param n_clicks:
-    :param town_size:
-    :param allowed_sources:
-    :return:
+    Trigger if site is reloaded or button is pressed.
+
+    :param n_clicks: Number of 'Generate items' presses, None if 0
+    :param town_size: Selected town size
+    :param allowed_sources: Selected rule set
+    :return: Updates accordingly
     """
     if n_clicks is not None:
         # Run item generator
@@ -185,7 +204,7 @@ def generate_items(n_clicks: int, town_size: str, allowed_sources: list):
         # Save table and output string in csv/txt files
         if items_dic is not None:
             items_df = pd.DataFrame(data=items_dic)
-            items_df.to_csv('current_table.csv')
+            items_df.to_csv('./assets/current_table.csv')
             with open('output_strings.txt', 'w') as f:
                 for string in print_strings:
                     f.write(string + '\n')
@@ -193,7 +212,7 @@ def generate_items(n_clicks: int, town_size: str, allowed_sources: list):
             items_df = pd.DataFrame(columns=['Name', 'Quantity', 'Slot', 'Price', 'Source', 'Description'])
     else:
         # Read csv/txt files on page load
-        items_df = pd.read_csv('current_table.csv')
+        items_df = pd.read_csv('./assets/current_table.csv')
         with open('output_strings.txt', 'r') as f:
             print_strings = f.readlines()
 
@@ -262,5 +281,48 @@ def generate_items(n_clicks: int, town_size: str, allowed_sources: list):
     return outp_str1, placeholder_style, outp_str2, fig_table, h
 
 
+@app.callback(
+    Output('download-dcc', 'data'),
+    Input('download-button', 'n_clicks'),
+    State('table-items', 'figure'),
+    State('prints2', 'children'),
+    prevent_initial_call=True,
+)
+def download_html(n_clicks: int, dict_table: dict, p2):
+    """
+    Downloads table as html file.
+
+    :param n_clicks: Number of 'Download as HTML' presses, None if 0
+    :param dict_table: table as dict
+    :param p2:
+    :return:
+    """
+    lines = ''
+    for p in p2:
+        lines += p['props']['children']
+    lines = lines.replace('\n', '<br>')
+
+    fig_table = go.Figure(data=dict_table)
+    fig_table.update_layout(
+        go.Layout(
+            margin=dict(l=3, r=18, t=0, b=80),
+            annotations=[
+                go.layout.Annotation(
+                    showarrow=False,
+                    text=f'{lines}',
+                    align='left',
+                    xanchor='left',
+                    x=0.01,
+                    yanchor='top',
+                    y=-0.01
+                )
+            ]
+        )
+    )
+    fig_table.write_html('./assets/current_table.html')
+
+    return dcc.send_file('./assets/current_table.html', filename='rolled_items.html')
+
+
 if __name__ == '__main__':
-    app.run_server()
+    app.run_server(debug=True)
