@@ -325,4 +325,4 @@ def download_html(n_clicks: int, dict_table: dict, p2):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server()
